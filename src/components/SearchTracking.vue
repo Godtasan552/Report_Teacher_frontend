@@ -60,7 +60,8 @@
               class="status-badge"
               :class="getStatusClass(searchResult.status)"
             >
-              {{ getStatusText(searchResult.status) }}
+              {{ searchResult.status_display }}
+
             </div>
           </div>
           <div v-if="searchResult.response" class="result-item">
