@@ -3,7 +3,7 @@
     <div class="submit-report">
       <!-- Header -->
       <div class="header">
-        <div class="header-icon">🏬</div>
+        <div class="header-icon">📂</div>
         <h1>ส่งรายงาน</h1>
         <p class="subtitle">กรุณากรอกข้อมูลให้ครบถ้วน</p>
       </div>
