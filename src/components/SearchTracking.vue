@@ -61,13 +61,18 @@
               :class="getStatusClass(searchResult.status)"
             >
               {{ searchResult.status_display }}
-
             </div>
           </div>
           <div v-if="searchResult.response" class="result-item">
             <span class="label">💬 การตอบกลับ:</span>
             <div class="response-text">{{ searchResult.response }}</div>
           </div>
+          <!-- แสดงไฟล์แนบ -->
+          <div v-if="searchResult.file" class="result-item">
+            <span class="label">📎 ไฟล์แนบ:</span>
+            <button @click="openFile(searchResult.file)">เปิดไฟล์แนบ</button>
+          </div>
+
           <div class="result-item">
             <span class="label">📅 วันที่ส่ง:</span>
             <span class="value">{{ formatDate(searchResult.created_at) }}</span>
@@ -110,14 +115,13 @@ import { useRoute } from "vue-router";
 import { searchReport as apiSearchReport } from "../api";
 
 const route = useRoute();
-
 const trackingId = ref("");
 const searchResult = ref(null);
 const showNoResult = ref(false);
 const isSearching = ref(false);
 const errorMessage = ref("");
 
-// ค้นหา report
+// ฟังก์ชันค้นหา report
 const doSearchReport = async () => {
   if (!trackingId.value) return;
 
@@ -135,6 +139,23 @@ const doSearchReport = async () => {
   } finally {
     isSearching.value = false;
   }
+};
+
+// ฟังก์ชันสร้าง URL ไฟล์แนบให้ browser เปิดได้
+const getFileUrl = (filePath: string) => {
+  // ถ้า backend ส่ง URL เต็มแล้ว ใช้ตรง ๆ
+  if (filePath.startsWith("http")) return filePath;
+  // ถ้าเป็น relative path ให้ต่อกับ origin
+  return window.location.origin + filePath;
+};
+
+const openFile = (filePath: string) => {
+  // แก้ไขตรงนี้ให้ใช้ backend URL เต็ม ๆ
+  let url = filePath.startsWith("http")
+    ? filePath
+    : "http://127.0.0.1:8000" + filePath; // <-- ต้องชี้ไป backend
+
+  window.open(url, "_blank");
 };
 
 // Auto-fill จาก query parameter
@@ -174,22 +195,14 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const getStatusText = (status: string) => {
-  const map: { [key: string]: string } = {
-    pending: "รอการตรวจสอบ",
-    reviewing: "กำลังตรวจสอบ",
-    completed: "เสร็จสิ้น",
-    rejected: "ถูกปฏิเสธ",
-  };
-  return map[status] || status;
-};
-
 const getStatusClass = (status: string) => {
   const map: { [key: string]: string } = {
-    pending: "status-pending",
-    reviewing: "status-reviewing",
-    completed: "status-completed",
-    rejected: "status-rejected",
+    ReportSent: "status-pending",
+    Received: "status-reviewing",
+    Forwarding: "status-reviewing",
+    Pending: "status-pending",
+    Checked: "status-completed",
+    Completed: "status-completed",
   };
   return map[status] || "status-default";
 };
